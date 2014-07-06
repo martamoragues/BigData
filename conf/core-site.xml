@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Put site-specific property overrides in this file. -->
+
+<configuration>
+	<property>
+		<name>hadoop.tmp.dir</name>
+		<value>/scratch/1/martam/hadoop_hdfs.7777788</value>
+		<description>Hadoop temporary file</description>
+	</property>
+	<property>
+		<name>fs.default.name</name>
+		<value>hdfs://arvei-47:54310</value>
+	</property>
+</configuration>
