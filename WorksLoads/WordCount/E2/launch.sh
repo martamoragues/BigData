@@ -30,27 +30,27 @@ $HADOOP_HOME/bin/hadoop --config $CONF dfs -rmr $INPUT/_*
 $HADOOP_HOME/bin/hadoop --config $CONF dfs -rmr $OUTPUT
 
 ### Contamos las palabras, usando el ejemplo que viene con hadoop:
-${HADOOP_HOME}/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.WordCount $INPUT $OUTPUT/E2/IT_100 2 100
+${HADOOP_HOME}/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.WordCount $INPUT $OUTPUT/E2/IT_100 2 1
 
 ### Contamos las palabras, usando el ejemplo que viene con hadoop:
-${HADOOP_HOME}/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.WordCount $INPUT $OUTPUT/E2/IT_50 2 50
+${HADOOP_HOME}/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.WordCount $INPUT $OUTPUT/E2/IT_50 2 2
 
 ### Contamos las palabras, usando el ejemplo que viene con hadoop:
-${HADOOP_HOME}/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.WordCount $INPUT $OUTPUT/E2/IT_25 2 25
+${HADOOP_HOME}/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.WordCount $INPUT $OUTPUT/E2/IT_25 2 4
 
 ### Contamos las palabras, usando el ejemplo que viene con hadoop:
 ${HADOOP_HOME}/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.WordCount $INPUT $OUTPUT/E2/IT_10 2 10
 
 ### Contamos las palabras, usando el ejemplo que viene con hadoop:
-${HADOOP_HOME}/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.WordCount $INPUT $OUTPUT/E2/IT_5 2 5
+${HADOOP_HOME}/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.WordCount $INPUT $OUTPUT/E2/IT_5 2 20
 
 ### Contamos las palabras, usando el ejemplo que viene con hadoop:
-${HADOOP_HOME}/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.WordCount $INPUT $OUTPUT/E2/IT_1 2 1
+${HADOOP_HOME}/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.WordCount $INPUT $OUTPUT/E2/IT_1 2 100
 ### Copiamos los datos del disco de hadoop HDFS a nuestra cuenta en el NAS:
 RESULT=/scratch/nas/2/$USER/$JOB_NAME"_"$JOB_ID
 mkdir -p $RESULT
 mkdir -p $RESULT/maps
-mkdir -p $RESULT/E1
+mkdir -p $RESULT/E2
  
 ${HADOOP_HOME}/bin/hadoop --config $CONF fs -get $INPUT $RESULT
 
