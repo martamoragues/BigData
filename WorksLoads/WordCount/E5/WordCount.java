@@ -24,24 +24,23 @@ public class WordCount {
 
     private final static IntWritable one = new IntWritable(1);
     private Text word = new Text();
-    private Float skipModule = null;
-    private float limit_to_read;
+    private int skipModule;
     private long size_block; 
-    private long current_read;
-
+    private long start_block; 
+    private boolean result;
+    private long num_bloc;
+    
     protected void setup(Context context){
-        current_read = 0;
-        skipModule = context.getConfiguration().getFloat("P", -1.0f);
+        start_block = ((FileSplit)context.getInputSplit()).getStart();
+        skipModule = context.getConfiguration().getInt("P", -1);
         size_block = ((FileSplit)context.getInputSplit()).getLength();
-        limit_to_read = size_block*skipModule;
-    }
+        num_bloc = start_block / size_block;
+        result = ((num_bloc%skipModule)==0);
+   }
     public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 
-            int line_length= value.getLength();
-            if(current_read < limit_to_read){    
-                current_read += (line_length + 1);
+            if(result){                    
                 StringTokenizer itr = new StringTokenizer(value.toString());
-
                 while (itr.hasMoreTokens()) {                  
                       word.set(itr.nextToken());
                       context.write(word, one);
@@ -49,7 +48,6 @@ public class WordCount {
             }
        }
   }
-
     
   public static class IntSumReducer
        extends Reducer<Text,IntWritable,Text,IntWritable> {
@@ -74,9 +72,8 @@ public class WordCount {
       System.err.println("Usage: wordcount <in> <out>");
       System.exit(2);
     }
-    float P = Float.parseFloat(otherArgs[2]);
-
-    conf.setFloat("P", P);
+    int P = Integer.parseInt(otherArgs[2]);
+    conf.setInt("P", P);
 
     Job job = new Job(conf, "word count");                                                                               
     job.setJarByClass(WordCount.class);
@@ -90,4 +87,4 @@ public class WordCount {
     System.exit(job.waitForCompletion(true) ? 0 : 1);
   }
 }
-                          
+

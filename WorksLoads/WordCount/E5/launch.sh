@@ -21,7 +21,7 @@ OUTPUT=$JOB_NAME"_"$JOB_ID"_OP"
 $HADOOP_HOME/bin/hadoop --config $CONF dfs -rmr $INPUT
 
 ### Copiamos los libros al sistema de ficheros HDFS de hadoop:
-${HADOOP_HOME}/bin/hadoop --config $CONF fs -copyFromLocal "/scratch/nas/2/$USER/marta" $INPUT
+${HADOOP_HOME}/bin/hadoop --config $CONF fs -copyFromLocal "/scratch/nas/2/$USER/hola" $INPUT
 
 $HADOOP_HOME/bin/hadoop --config $CONF dfs -rmr $INPUT/_*
 
