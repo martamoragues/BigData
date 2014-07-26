@@ -63,6 +63,7 @@ public class IdentityMapperMarta<K, V> extends MapReduceBase implements Mapper<K
           result = num_random(prop);
           return;
     }
-	  result = result - 1.0
+	  result = result - 1.0;
   }
 }
+
