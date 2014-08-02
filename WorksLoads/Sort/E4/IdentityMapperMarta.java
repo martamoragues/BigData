@@ -37,7 +37,7 @@ import org.apache.hadoop.mapred.FileSplit;
 public class IdentityMapperMarta<K, V> extends MapReduceBase implements Mapper<K, V, K, V> {
 
       private float limit_to_sort;
-      private long size_block; 
+      private Long size_block; 
       private long current_sort;
       private Float skipModule = null;
 
@@ -50,7 +50,7 @@ public class IdentityMapperMarta<K, V> extends MapReduceBase implements Mapper<K
 
   public void map(K key, V val, OutputCollector<K, V> output, Reporter reporter) throws IOException {
      if(size_block == null){
-        size_block = ((FileSplit)reporter.getInputSplit()).getStart();
+        size_block = ((FileSplit)reporter.getInputSplit()).getLength();
         limit_to_sort = size_block*skipModule;
     }
 
@@ -61,3 +61,4 @@ public class IdentityMapperMarta<K, V> extends MapReduceBase implements Mapper<K
     }
   }
 }
+
