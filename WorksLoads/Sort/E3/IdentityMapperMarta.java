@@ -28,10 +28,7 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.input.FileSplit;
-
+import org.apache.hadoop.mapred.FileSplit;
 /** Implements the identity function, mapping inputs directly to outputs. 
  * @deprecated Use {@link org.apache.hadoop.mapreduce.Mapper} instead.
  */
@@ -45,25 +42,25 @@ public class IdentityMapperMarta<K, V> extends MapReduceBase implements Mapper<K
       private Float skipModule = null;
 
 
-      public void configure(JobConf job){
-        //0.05, 0.01...
+	    public void configure(JobConf job){
         skipModule = job.getFloat("P", -1.0f);
-        size_all_data = job.getInt("DATASIZE", -1);
+        size_all_data = job.getLong("DATASIZE", -1);
         limit_to_read = size_all_data*skipModule;
-      
+     	
 
       }
   /** The identify function.  Input key/value pair is written directly to
    * output.*/
   public void map(K key, V val, OutputCollector<K, V> output, Reporter reporter) throws IOException {
-  if(start_block == null){
-    start_block = ((FileSplit)reporter.getInputSplit()).getStart();
-      current_read = start_block;
-  }
-  long line_length=((Text)val).getLength();
+	if(start_block == null){
+		start_block = ((FileSplit)reporter.getInputSplit()).getStart();
+    	current_read = start_block;
+	}
+	long line_length=((Text)val).getLength() + ((Text)key).getLength();
     if(current_read < limit_to_read){    
-      current_read += (line_length + 1);
-      output.collect(key, val);
+      current_read += (line_length + 9);
+	    output.collect(key, val);
     }
   }
 }
+
