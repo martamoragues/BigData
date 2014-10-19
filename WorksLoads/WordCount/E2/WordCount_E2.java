@@ -18,7 +18,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.util.GenericOptionsParser;
 
-public class WordCount {
+public class WordCount_E2 {
 
   public static class TokenizerMapper
        extends Mapper<Object, Text, Text, IntWritable>{
@@ -91,10 +91,8 @@ public class WordCount {
 
     conf.setFloat("max", max);
     conf.setInt("seed", seed);
-    Job job = new Job(conf, "word count");
-                                                             
-                                                             
-    job.setJarByClass(WordCount.class);
+    Job job = new Job(conf, "word count E2 seed: "+seed+ " max: " +max);
+    job.setJarByClass(WordCount_E2.class);
     job.setMapperClass(TokenizerMapper.class);
     job.setCombinerClass(IntSumReducer.class);
     job.setReducerClass(IntSumReducer.class);

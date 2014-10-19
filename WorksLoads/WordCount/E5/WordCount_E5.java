@@ -18,7 +18,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.util.GenericOptionsParser;
 
-public class WordCount {
+public class WordCount_E5 {
 
   public static class TokenizerMapper extends Mapper<Object, Text, Text, IntWritable>{
 
@@ -75,8 +75,8 @@ public class WordCount {
     int P = Integer.parseInt(otherArgs[2]);
     conf.setInt("P", P);
 
-    Job job = new Job(conf, "word count");                                                                               
-    job.setJarByClass(WordCount.class);
+    Job job = new Job(conf, "word count E5 P: "+P);
+    job.setJarByClass(WordCount_E5.class);
     job.setMapperClass(TokenizerMapper.class);
     job.setCombinerClass(IntSumReducer.class);
     job.setReducerClass(IntSumReducer.class);
