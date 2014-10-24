@@ -76,8 +76,8 @@ public class Sort<K,V> extends Configured implements Tool {
   public int run(String[] args) throws Exception {
 
     JobConf jobConf = new JobConf(getConf(), Sort.class);
-    jobConf.setJobName("sorter");
-	jobConf.setMapperClass(IdentityMapperMarta.class);
+    jobConf.setJobName("sort E3 P: " +P);
+	jobConf.setMapperClass(IdentityMapper_E5.class);
     jobConf.setReducerClass(IdentityReducer.class);
 
     JobClient client = new JobClient(jobConf);
@@ -144,7 +144,7 @@ public class Sort<K,V> extends Configured implements Tool {
     jobConf.setOutputValueClass(outputValueClass);
 
     // Make sure there are exactly 2 parameters left.
-    if (otherArgs.size() != 4) {
+    if (otherArgs.size() != 3) {
       System.out.println("ERROR: Wrong number of parameters: " +
           otherArgs.size() + " instead of 2.");
       return printUsage();
@@ -152,10 +152,8 @@ public class Sort<K,V> extends Configured implements Tool {
     FileInputFormat.setInputPaths(jobConf, otherArgs.get(0));
     FileOutputFormat.setOutputPath(jobConf, new Path(otherArgs.get(1)));
 	//Afegitmper fer mostreig del sort
-	int seed = Integer.parseInt(otherArgs.get(2));
-    int P = Integer.parseInt(otherArgs.get(3));
-    jobConf.setInt("P", P);
-    jobConf.setInt("seed", seed);
+    float  P = Float.parseFloat(otherArgs.get(2));
+    jobConf.setFloat("P", P);
 
     if (sampler != null) {
       System.out.println("Sampling input to effect total-order sort...");

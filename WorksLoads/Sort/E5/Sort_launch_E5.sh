@@ -3,7 +3,7 @@
 # Indicamos el shell a usar:
 #$ -S /bin/bash
 # Indicamos las versiones a usar de hadoop (imprescindible):
-#$ -v JAVA_HOME=/Soft/java/jdk1.6.0_30,HADOOP_HOME=/Soft/hadoop/0.20.203.0,HADOOP_CONF=/scratch/nas/2/martam/conf
+#$ -v JAVA_HOME=/usr,HADOOP_HOME=/Soft/hadoop/0.20.203.0,HADOOP_CONF=/scratch/nas/2/martam/conf
 # Indicamos que nos envie  un correo cuando empieze el trabajo y cuando acabe...
 #$ -m bea
 # ... a esta dirección de correo
@@ -25,8 +25,8 @@ COMPRESS_CODEC=$COMPRESS_CODEC_GLOBAL
 
 # for prepare (per node) - 24G/node
 #DATASIZE=24000000000
-DATASIZE=4000000000
-NUM_MAPS=4
+ DATASIZE=4000
+ NUM_MAPS=1
 
 # for running (in total)
 NUM_REDS=1
@@ -80,47 +80,47 @@ SIZE=`$HADOOP_HOME/bin/hadoop --config $CONF fs -dus $INPUT | awk '{ print $2 }'
 
 # run bench
 
-$HADOOP_HOME/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.Sort \
+$HADOOP_HOME/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.Sort_E5 \
     $COMPRESS_OPT \
     -outKey org.apache.hadoop.io.Text \
     -outValue org.apache.hadoop.io.Text \
     -r ${NUM_REDS} \
-    $INPUT $OUTPUT/E1/IT_100 2 100
+    $INPUT $OUTPUT/E5/IT_100 1
 
-$HADOOP_HOME/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.Sort \
+$HADOOP_HOME/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.Sort_E5 \
     $COMPRESS_OPT \
     -outKey org.apache.hadoop.io.Text \
     -outValue org.apache.hadoop.io.Text \
     -r ${NUM_REDS} \
-    $INPUT $OUTPUT/E1/IT_50 2 50
+    $INPUT $OUTPUT/E5/IT_50 0.5
 
-$HADOOP_HOME/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.Sort \
+$HADOOP_HOME/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.Sort_E5 \
     $COMPRESS_OPT \
     -outKey org.apache.hadoop.io.Text \
     -outValue org.apache.hadoop.io.Text \
     -r ${NUM_REDS} \
-    $INPUT $OUTPUT/E1/IT_25 2 25
+    $INPUT $OUTPUT/E5/IT_25 0.25
 
-$HADOOP_HOME/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.Sort \
+$HADOOP_HOME/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.Sort_E5 \
     $COMPRESS_OPT \
     -outKey org.apache.hadoop.io.Text \
     -outValue org.apache.hadoop.io.Text \
     -r ${NUM_REDS} \
-    $INPUT $OUTPUT/E1/IT_10 2 10
+    $INPUT $OUTPUT/E5/IT_10 0.1
 
-$HADOOP_HOME/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.Sort \
+$HADOOP_HOME/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.Sort_E5 \
     $COMPRESS_OPT \
     -outKey org.apache.hadoop.io.Text \
     -outValue org.apache.hadoop.io.Text \
     -r ${NUM_REDS} \
-    $INPUT $OUTPUT/E1/IT_5 2 5
+    $INPUT $OUTPUT/E5/IT_5 0.05
 
-$HADOOP_HOME/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.Sort \
+$HADOOP_HOME/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.Sort_E5 \
     $COMPRESS_OPT \
     -outKey org.apache.hadoop.io.Text \
     -outValue org.apache.hadoop.io.Text \
     -r ${NUM_REDS} \
-    $INPUT $OUTPUT/E1/IT_1 2 1
+    $INPUT $OUTPUT/E5/IT_1 0.01
 	
 # post-running
 
@@ -130,38 +130,24 @@ echo "fi run pagerank"
 
 ### Copiamos los datos del disco de hadoop HDFS a nuestra cuenta en el NAS:
 RESULT=/scratch/nas/2/$USER/$JOB_NAME"_"$JOB_ID
+# post-running
+
 mkdir -p $RESULT
-mkdir -p $RESULT/maps
-mkdir -p $RESULT/E1
+mkdir -p $RESULT/E5
 
 ${HADOOP_HOME}/bin/hadoop --config $CONF fs -get $INPUT $RESULT
 
-${HADOOP_HOME}/bin/hadoop --config $CONF fs -getmerge $OUTPUT/E1/IT_100 $RESULT/E1/E1_100.txt
-${HADOOP_HOME}/bin/hadoop --config $CONF fs -getmerge $OUTPUT/E1/IT_50 $RESULT/E1/E1_50.txt
-${HADOOP_HOME}/bin/hadoop --config $CONF fs -getmerge $OUTPUT/E1/IT_25 $RESULT/E1/E1_25.txt
-${HADOOP_HOME}/bin/hadoop --config $CONF fs -getmerge $OUTPUT/E1/IT_10 $RESULT/E1/E1_10.txt
-${HADOOP_HOME}/bin/hadoop --config $CONF fs -getmerge $OUTPUT/E1/IT_5 $RESULT/E1/E1_5.txt
-${HADOOP_HOME}/bin/hadoop --config $CONF fs -getmerge $OUTPUT/E1/IT_1 $RESULT/E1/E1_1.txt
+
+${HADOOP_HOME}/bin/hadoop --config $CONF fs -getmerge $OUTPUT/E5/IT_100 $RESULT/E5/E5_100.txt
+${HADOOP_HOME}/bin/hadoop --config $CONF fs -getmerge $OUTPUT/E5/IT_50 $RESULT/E5/E5_50.txt
+${HADOOP_HOME}/bin/hadoop --config $CONF fs -getmerge $OUTPUT/E5/IT_25 $RESULT/E5/E5_25.txt
+${HADOOP_HOME}/bin/hadoop --config $CONF fs -getmerge $OUTPUT/E5/IT_10 $RESULT/E5/E5_10.txt
+${HADOOP_HOME}/bin/hadoop --config $CONF fs -getmerge $OUTPUT/E5/IT_5 $RESULT/E5/E5_5.txt
+${HADOOP_HOME}/bin/hadoop --config $CONF fs -getmerge $OUTPUT/E5/IT_1 $RESULT/E5/E5_1.txt
 
 
-wget -O $RESULT/web_jobhistoryhome.html http://localhost:50030/jobhistoryhome.jsp
-wget -O $RESULT/web_jobtracker.html http://localhost:50030/jobtracker.jsp
-wget -O $RESULT/web_machines.html "http://localhost:50030/machines.jsp?type=active"
-
-HADOOP_INTERNAL_JOB_ID=`grep -o 'job_[0-9]\+_[0-9]\+' $RESULT/web_jobtracker.html | head -n 1`
-echo "El hadoop job id trobat es $HADOOP_INTERNAL_JOB_ID"
-wget -O $RESULT/web_job.html "http://localhost:50030/jobdetails.jsp?jobid=$HADOOP_INTERNAL_JOB_ID"
-wget -O $RESULT/web_map.html "http://localhost:50030/jobtasks.jsp?jobid=$HADOOP_INTERNAL_JOB_ID&type=map&pagenum=1"
-wget -O $RESULT/web_reduce.html "http://localhost:50030/jobtasks.jsp?jobid=$HADOOP_INTERNAL_JOB_ID&type=reduce&pagenum=1"
-
-HADOOP_MAP_TASKS=`grep -o 'taskdetails.jsp?tipid=task_[0-9]\+_[0-9]\+_m_[0-9]\+' $RESULT/web_map.html`
-while read line
-do
-    MAP_TASK_ID=`echo $line | grep -o 'task_[0-9]\+_[0-9]\+_m_[0-9]\+'`
-    echo "Hadoop map task id trobat: $MAP_TASK_ID"
-    wget -O $RESULT/maps/$MAP_TASK_ID.html "http://localhost:50030/taskdetails.jsp?tipid=${MAP_TASK_ID}"
-done <<< "$HADOOP_MAP_TASKS"
-
+# Descarrega tota la web
+wget -q -r -k -p -nH --adjust-extension --exclude-directories=/logs/ -l 0 -P $RESULT/links/ http://localhost:50030
 # //BORREM LES DADES DEL HDFS
 
 ${HADOOP_HOME}/bin/hadoop fs -rmr $INPUT
