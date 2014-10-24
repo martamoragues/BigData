@@ -3,7 +3,7 @@
 # Indicamos el shell a usar:
 #$ -S /bin/bash
 # Indicamos las versiones a usar de hadoop (imprescindible):
-#$ -v JAVA_HOME=/Soft/java/jdk1.6.0_30,HADOOP_HOME=/Soft/hadoop/0.20.203.0,HADOOP_CONF=/scratch/nas/2/martam/conf
+#$ -v JAVA_HOME=/usr,HADOOP_HOME=/Soft/hadoop/0.20.203.0,HADOOP_CONF=/scratch/nas/2/martam/conf
 # Indicamos que nos envie  un correo cuando empieze el trabajo y cuando acabe...
 #$ -m bea
 # ... a esta dirección de correo
@@ -30,26 +30,25 @@ $HADOOP_HOME/bin/hadoop --config $CONF dfs -rmr $INPUT/_*
 $HADOOP_HOME/bin/hadoop --config $CONF dfs -rmr $OUTPUT
 
 ### Contamos las palabras, usando el ejemplo que viene con hadoop:
-${HADOOP_HOME}/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.WordCount $INPUT $OUTPUT/E3/IT_100 1 $SIZE_ALL_DATA
+${HADOOP_HOME}/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.WordCount_E3 $INPUT $OUTPUT/E3/IT_100 1 $SIZE_ALL_DATA
 
 ### Contamos las palabras, usando el ejemplo que viene con hadoop:
-${HADOOP_HOME}/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.WordCount $INPUT $OUTPUT/E3/IT_50 0.5 $SIZE_ALL_DATA
+${HADOOP_HOME}/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.WordCount_E3 $INPUT $OUTPUT/E3/IT_50 0.5 $SIZE_ALL_DATA
 
 ### Contamos las palabras, usando el ejemplo que viene con hadoop:
-${HADOOP_HOME}/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.WordCount $INPUT $OUTPUT/E3/IT_25 0.25 $SIZE_ALL_DATA
+${HADOOP_HOME}/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.WordCount_E3 $INPUT $OUTPUT/E3/IT_25 0.25 $SIZE_ALL_DATA
 
 ### Contamos las palabras, usando el ejemplo que viene con hadoop:
-${HADOOP_HOME}/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.WordCount $INPUT $OUTPUT/E3/IT_10 0.10 $SIZE_ALL_DATA
+${HADOOP_HOME}/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.WordCount_E3 $INPUT $OUTPUT/E3/IT_10 0.10 $SIZE_ALL_DATA
 
 ### Contamos las palabras, usando el ejemplo que viene con hadoop:
-${HADOOP_HOME}/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.WordCount $INPUT $OUTPUT/E3/IT_5 0.05 $SIZE_ALL_DATA
+${HADOOP_HOME}/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.WordCount_E3 $INPUT $OUTPUT/E3/IT_5 0.05 $SIZE_ALL_DATA
 
 ### Contamos las palabras, usando el ejemplo que viene con hadoop:
-${HADOOP_HOME}/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.WordCount $INPUT $OUTPUT/E3/IT_1 0.01 $SIZE_ALL_DATA 
+${HADOOP_HOME}/bin/hadoop --config $CONF jar /scratch/nas/2/$USER/wc.jar org.apache.hadoop.examples.WordCount_E3 $INPUT $OUTPUT/E3/IT_1 0.01 $SIZE_ALL_DATA 
 ### Copiamos los datos del disco de hadoop HDFS a nuestra cuenta en el NAS:
 RESULT=/scratch/nas/2/$USER/$JOB_NAME"_"$JOB_ID
 mkdir -p $RESULT
-mkdir -p $RESULT/maps
 mkdir -p $RESULT/E3
  
 ${HADOOP_HOME}/bin/hadoop --config $CONF fs -get $INPUT $RESULT
@@ -61,24 +60,8 @@ ${HADOOP_HOME}/bin/hadoop --config $CONF fs -getmerge $OUTPUT/E3/IT_10 $RESULT/E
 ${HADOOP_HOME}/bin/hadoop --config $CONF fs -getmerge $OUTPUT/E3/IT_5 $RESULT/E3/E3_5.txt
 ${HADOOP_HOME}/bin/hadoop --config $CONF fs -getmerge $OUTPUT/E3/IT_1 $RESULT/E3/E3_1.txt
 
-wget -O $RESULT/web_jobhistoryhome.html http://localhost:50030/jobhistoryhome.jsp
-wget -O $RESULT/web_jobtracker.html http://localhost:50030/jobtracker.jsp
-wget -O $RESULT/web_machines.html "http://localhost:50030/machines.jsp?type=active"
-
-HADOOP_INTERNAL_JOB_ID=`grep -o 'job_[0-9]\+_[0-9]\+' $RESULT/web_jobtracker.html | head -n 1`
-echo "El hadoop job id trobat es $HADOOP_INTERNAL_JOB_ID"
-wget -O $RESULT/web_job.html "http://localhost:50030/jobdetails.jsp?jobid=$HADOOP_INTERNAL_JOB_ID"
-wget -O $RESULT/web_map.html "http://localhost:50030/jobtasks.jsp?jobid=$HADOOP_INTERNAL_JOB_ID&type=map&pagenum=1"
-wget -O $RESULT/web_reduce.html "http://localhost:50030/jobtasks.jsp?jobid=$HADOOP_INTERNAL_JOB_ID&type=reduce&pagenum=1"
-
-HADOOP_MAP_TASKS=`grep -o 'taskdetails.jsp?tipid=task_[0-9]\+_[0-9]\+_m_[0-9]\+' $RESULT/web_map.html`
-while read line
-do
-	MAP_TASK_ID=`echo $line | grep -o 'task_[0-9]\+_[0-9]\+_m_[0-9]\+'`
-	echo "Hadoop map task id trobat: $MAP_TASK_ID"
-	wget -O $RESULT/maps/$MAP_TASK_ID.html "http://localhost:50030/taskdetails.jsp?tipid=${MAP_TASK_ID}"
-done <<< "$HADOOP_MAP_TASKS"
-
+# Descarrega tota la web
+wget -q -r -k -p -nH --adjust-extension --exclude-directories=/logs/ -l 0 -P $RESULT/links/ http://localhost:50030
 ${HADOOP_HOME}/bin/hadoop fs -rmr $INPUT
 ${HADOOP_HOME}/bin/hadoop fs -rmr $OUTPUT
 

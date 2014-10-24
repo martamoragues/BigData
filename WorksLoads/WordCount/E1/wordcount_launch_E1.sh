@@ -17,6 +17,7 @@ export COMPRESS_CODEC_GLOBAL=org.apache.hadoop.io.compress.DefaultCodec
 ### Definimos unos directorios de trabajo dentro del HDFS:
 INPUT=$JOB_NAME"_"$JOB_ID"_IP"
 OUTPUT=$JOB_NAME"_"$JOB_ID"_OP"
+
 # path check
 $HADOOP_HOME/bin/hadoop --config $CONF dfs -rmr $INPUT
 
