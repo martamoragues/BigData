@@ -189,7 +189,7 @@ System.out.println("getNumMapTasks()  " + jobConf.getNumMapTasks() );
 
 
   public static void main(String[] args) throws Exception {
-    int res = ToolRunner.run(new Configuration(), new Sort(), args);
+    int res = ToolRunner.run(new Configuration(), new Sort_E5(), args);
     System.exit(res);
   }
 
