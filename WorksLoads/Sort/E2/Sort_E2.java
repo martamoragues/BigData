@@ -75,7 +75,7 @@ public class Sort<K,V> extends Configured implements Tool {
    */
   public int run(String[] args) throws Exception {
 
-    JobConf jobConf = new JobConf(getConf(), Sort.class);
+    JobConf jobConf = new JobConf(getConf(), Sort_E2.class);
     jobConf.setJobName("sort E2 seed: "+seed+ " P: " +P);
 	jobConf.setMapperClass(IdentityMapper_E2.class);
     jobConf.setReducerClass(IdentityReducer.class);
