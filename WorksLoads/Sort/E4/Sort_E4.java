@@ -51,7 +51,7 @@ import org.apache.hadoop.mapred.Mapper;
  *            [-totalOrder <i>pcnt</i> <i>num samples</i> <i>max splits</i>]
  *            <i>in-dir</i> <i>out-dir</i> 
  */
-public class Sort<K,V> extends Configured implements Tool {
+public class Sort_E4<K,V> extends Configured implements Tool {
   private RunningJob jobResult = null;
 
 
@@ -76,7 +76,7 @@ public class Sort<K,V> extends Configured implements Tool {
   public int run(String[] args) throws Exception {
 
     JobConf jobConf = new JobConf(getConf(), Sort_E4.class);
-    jobConf.setJobName("sort E4 P: " +P);
+    //jobConf.setJobName("sort E4 P: " +P);
 	jobConf.setMapperClass(IdentityMapper_E4.class);
     jobConf.setReducerClass(IdentityReducer.class);
 
@@ -154,6 +154,7 @@ public class Sort<K,V> extends Configured implements Tool {
 	//Afegitmper fer mostreig del sort
     float  P = Float.parseFloat(otherArgs.get(2));
     jobConf.setFloat("P", P);
+    jobConf.setJobName("sort E4 P: " +P);
 
     if (sampler != null) {
       System.out.println("Sampling input to effect total-order sort...");

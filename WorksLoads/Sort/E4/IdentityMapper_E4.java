@@ -34,7 +34,7 @@ import org.apache.hadoop.mapred.FileSplit;
  * @deprecated Use {@link org.apache.hadoop.mapreduce.Mapper} instead.
  */
 @Deprecated
-public class IdentityMapperMarta<K, V> extends MapReduceBase implements Mapper<K, V, K, V> {
+public class IdentityMapper_E4<K, V> extends MapReduceBase implements Mapper<K, V, K, V> {
 
       private float limit_to_sort;
       private Long size_block; 

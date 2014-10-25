@@ -32,7 +32,7 @@ import org.apache.hadoop.mapred.MapReduceBase;
  * @deprecated Use {@link org.apache.hadoop.mapreduce.Mapper} instead.
  */
 @Deprecated
-public class IdentityMapperMarta<K, V> extends MapReduceBase implements Mapper<K, V, K, V> {
+public class IdentityMapper_E2<K, V> extends MapReduceBase implements Mapper<K, V, K, V> {
 
       private Random rnd = null;
       private Float skipModule = null;
