@@ -340,7 +340,7 @@ public class PagerankNaive_E5 extends Configured implements Tool
     // Main entry point.
     public static void main (final String[] args) throws Exception
     {
-		final int result = ToolRunner.run(new Configuration(), new PagerankNaive(), args);
+		final int result = ToolRunner.run(new Configuration(), new PagerankNaive_E5(), args);
 
 		System.exit(result);
     }
@@ -349,7 +349,7 @@ public class PagerankNaive_E5 extends Configured implements Tool
     // Print the command-line usage text.
     protected static int printUsage ()
     {
-		System.out.println("PagerankNaive <input_path> <output_path> <# of nodes>  <# of tasks> <max iteration> <makesym or nosym> <new or contNN>");
+		System.out.println("PagerankNaive_E5 <input_path> <output_path> <# of nodes>  <# of tasks> <max iteration> <makesym or nosym> <new or contNN>");
 
 		ToolRunner.printGenericCommandUsage(System.out);
 
@@ -510,7 +510,7 @@ public class PagerankNaive_E5 extends Configured implements Tool
 	// Configure pass1
     protected JobConf configStage1 () throws Exception
     {
-		final JobConf conf = new JobConf(getConf(), PagerankNaive.class);
+		final JobConf conf = new JobConf(getConf(), PagerankNaive_E5.class);
 		conf.set("number_nodes", "" + number_nodes);
 		conf.set("mixing_c", "" + mixing_c);
 		conf.set("make_symmetric", "" + make_symmetric);
@@ -535,7 +535,7 @@ public class PagerankNaive_E5 extends Configured implements Tool
 	// Configure pass2
     protected JobConf configStage2 () throws Exception
     {
-		final JobConf conf = new JobConf(getConf(), PagerankNaive.class);
+		final JobConf conf = new JobConf(getConf(), PagerankNaive_E5.class);
 		conf.set("number_nodes", "" + number_nodes);
 		conf.set("mixing_c", "" + mixing_c);
 		conf.set("converge_threshold", "" + converge_threshold);
@@ -558,7 +558,7 @@ public class PagerankNaive_E5 extends Configured implements Tool
 	// Configure pass3
     protected JobConf configStage3 () throws Exception
     {
-		final JobConf conf = new JobConf(getConf(), PagerankNaive.class);
+		final JobConf conf = new JobConf(getConf(), PagerankNaive_E5.class);
 		conf.set("number_nodes", "" + number_nodes);
 		conf.set("mixing_c", "" + mixing_c);
 		conf.set("converge_threshold", "" + converge_threshold);
@@ -582,7 +582,7 @@ public class PagerankNaive_E5 extends Configured implements Tool
 	// Configure pass4
     protected JobConf configStage4 (double min_pr, double max_pr) throws Exception
     {
-		final JobConf conf = new JobConf(getConf(), PagerankNaive.class);
+		final JobConf conf = new JobConf(getConf(), PagerankNaive_E5.class);
 		conf.set("min_pr", "" + min_pr);
 		conf.set("max_pr", "" + max_pr);
 
