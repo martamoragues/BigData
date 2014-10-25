@@ -3,7 +3,7 @@
 # Indicamos el shell a usar:
 #$ -S /bin/bash
 # Indicamos las versiones a usar de hadoop (imprescindible):
-#$ -v JAVA_HOME=/Soft/java/jdk1.6.0_30,HADOOP_HOME=/Soft/hadoop/0.20.203.0,HADOOP_CONF=/scratch/nas/2/martam/conf
+#$ -v JAVA_HOME=/usr,HADOOP_HOME=/Soft/hadoop/0.20.203.0,HADOOP_CONF=/scratch/nas/2/martam/conf
 # Indicamos que nos envie  un correo cuando empieze el trabajo y cuando acabe...
 #$ -m bea
 # ... a esta dirección de correo
@@ -74,31 +74,18 @@ SIZE=`$HADOOP_HOME/bin/hadoop fs -dus $INPUT_HDFS | awk '{ print $2 }'`
 export NUTCH_CONF_DIR=$HADOOP_CONF_DIR
 ${HADOOP_HOME}/bin/hadoop --config $CONF fs -lsr /
 # run bench
-$NUTCH_HOME/bin/nutch index $COMPRESS_OPTS $INPUT_HDFS/indexes $INPUT_HDFS/crawldb $INPUT_HDFS/linkdb $INPUT_HDFS/segments/*
+$NUTCH_HOME/bin/nutch index_E3 $COMPRESS_OPTS 100 2 $INPUT_HDFS/indexes $INPUT_HDFS/crawldb $INPUT_HDFS/linkdb $INPUT_HDFS/segments/*
 
 $HADOOP_HOME/bin/hadoop fs -lsr /
 ### Copiamos los datos del disco de hadoop HDFS a nuestra cuenta en el NAS:
 RESULT=/scratch/nas/2/$USER/$OUTPUT
 mkdir $RESULT
-mkdir $RESULT/maps
+mkdir $RESULT/E3
 ${HADOOP_HOME}/bin/hadoop --config $CONF fs -get $DATA_HDFS $RESULT
-wget -O $RESULT/web_jobhistoryhome.html http://localhost:50030/jobhistoryhome.jsp
-wget -O $RESULT/web_jobtracker.html http://localhost:50030/jobtracker.jsp
-wget -O $RESULT/web_machines.html "http://localhost:50030/machines.jsp?type=active"
 
-HADOOP_INTERNAL_JOB_ID=`grep -o 'job_[0-9]\+_[0-9]\+' $RESULT/web_jobtracker.html | head -n 1`
-echo "El hadoop job id trobat es $HADOOP_INTERNAL_JOB_ID"
-wget -O $RESULT/web_job.html "http://localhost:50030/jobdetails.jsp?jobid=$HADOOP_INTERNAL_JOB_ID"
-wget -O $RESULT/web_map.html "http://localhost:50030/jobtasks.jsp?jobid=$HADOOP_INTERNAL_JOB_ID&type=map&pagenum=1"
-wget -O $RESULT/web_reduce.html "http://localhost:50030/jobtasks.jsp?jobid=$HADOOP_INTERNAL_JOB_ID&type=reduce&pagenum=1"
+# Descarrega tota la web
+wget -q -r -k -p -nH --adjust-extension --exclude-directories=/logs/ -l 0 -P $RESULT/links/ http://localhost:50030
 
-HADOOP_MAP_TASKS=`grep -o 'taskdetails.jsp?tipid=task_[0-9]\+_[0-9]\+_m_[0-9]\+' $RESULT/web_map.html`
-while read line
-do
-    MAP_TASK_ID=`echo $line | grep -o 'task_[0-9]\+_[0-9]\+_m_[0-9]\+'`
-    echo "Hadoop map task id trobat: $MAP_TASK_ID"
-    wget -O $RESULT/maps/$MAP_TASK_ID.html "http://localhost:50030/taskdetails.jsp?tipid=${MAP_TASK_ID}"
-done <<< "$HADOOP_MAP_TASKS"
 
 # //BORREM LES DADES DEL HDFS
 
