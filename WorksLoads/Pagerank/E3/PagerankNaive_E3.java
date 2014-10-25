@@ -29,14 +29,15 @@ import org.apache.hadoop.fs.*;
 import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapred.*;
 import org.apache.hadoop.util.*;
+import java.lang.Math;
 
-class MinMaxInfo
+class MinMaxInfo_E3
 {
 	public double min;
 	public double max;
 };
 
-public class PagerankNaive extends Configured implements Tool 
+public class PagerankNaive_E3 extends Configured implements Tool 
 {
     protected static enum PrCounters { CONVERGE_CHECK }
 	protected static double converge_threshold = 0.000001;
@@ -50,24 +51,24 @@ public class PagerankNaive extends Configured implements Tool
 	public static class MapStage1 extends MapReduceBase	implements Mapper<LongWritable, Text, IntWritable, Text>
     {
 		int make_symmetric = 0;
-		Random rnd = null;
-		int seed_console = null;
-		int max_console =null;
+     	private Float P = null;
+		private float limit_to_read;
+        private Long start_block; 
+        private long size_all_data;
+        private long current_read;
+
+
 		public void configure(JobConf job) {
 			make_symmetric = Integer.parseInt(job.get("make_symmetric"));
-
-			System.out.println("MapStage1 : make_symmetric = " + make_symmetric);
+        	P = job.getFloat("P", -1.0f);
+			size_all_data = job.getLong("DATASIZE", -1);
+        	limit_to_read = size_all_data*P;
+			//System.out.println("MapStage1 : make_symmetric = " + make_symmetric);
 		}
 
 		public void map (final LongWritable key, final Text value, final OutputCollector<IntWritable, Text> output, final Reporter reporter) throws IOException
 		{
-			//XXXXXXXXX
-			if(rnd == null){
-	          	rnd = new Random(context.getConfiguration().getInt("seed", -1));
-	      	}
-	      	int random = rnd.nextInt(context.getConfiguration().getInt("max", -1));
-
-			System.out.println("ENTRO AL MAAAAP DEL NAIVE :");
+			
 			String line_text = value.toString();
 			if (line_text.startsWith("#"))				// ignore comments in edge file
 				return;
@@ -77,10 +78,6 @@ public class PagerankNaive extends Configured implements Tool
 				return;
 
 			if( line[1].charAt(0) == 'v' ) {	// vector : ROWID	VALUE('vNNNN')
-			//XXXXXXXXXXXX
-				if(random != 0){
-	                continue;
-	            }
 				output.collect( new IntWritable(Integer.parseInt(line[0])), new Text(line[1]) );
 			} else {							
 				// In other matrix-vector multiplication, we output (dst, src) here
@@ -88,12 +85,17 @@ public class PagerankNaive extends Configured implements Tool
 				// Therefore, we output (src,dst) here.
 				int src_id = Integer.parseInt(line[0]);
 				int dst_id = Integer.parseInt(line[1]);
-				//XXXXXXXX
-				if(random != 0){
-	                continue;
-	            }
-				output.collect( new IntWritable( src_id ), new Text(line[1]) );
-
+//System.out.println("start block: "+start_block);
+//System.out.println("current read: " + current_read);			
+				if(start_block == null){
+					start_block = ((FileSplit)reporter.getInputSplit()).getStart();
+    				current_read = start_block;
+				}
+				long line_length=(value).getLength();
+    			if(current_read < limit_to_read){    
+      				current_read += line_length;
+    				output.collect( new IntWritable( src_id ), new Text(line[1]) );
+				}
 				if( make_symmetric == 1 )
 					output.collect( new IntWritable( dst_id ), new Text(line[0]) );
 			}
@@ -339,7 +341,8 @@ public class PagerankNaive extends Configured implements Tool
 	protected double mixing_c = 0.85f;
 	protected int nreducers = 1;
 	protected int make_symmetric = 0;		// convert directed graph to undirected graph
-
+	protected int DATASIZE = 0;
+	protected Float P=0.0f;
     // Main entry point.
     public static void main (final String[] args) throws Exception
     {
@@ -377,9 +380,8 @@ public class PagerankNaive extends Configured implements Tool
 		number_nodes = Integer.parseInt(args[2]);
 		nreducers = Integer.parseInt(args[3]);
 		niteration = Integer.parseInt(args[4]);
-		seed_console = Integer.parseInt(args[7]);
-		max_console = Integer.parseInt(args[8]);
-
+		DATASIZE = Integer.parseInt(args[7]);
+		P = Float.parseFloat(args[8]);
 		if( args[5].compareTo("makesym") == 0 )
 			make_symmetric = 1;
 		else
@@ -480,9 +482,9 @@ public class PagerankNaive extends Configured implements Tool
 	}
 
 	// read neighborhood number after each iteration.
-	public static MinMaxInfo readMinMax(String new_path) throws Exception
+	public static MinMaxInfo_E3 readMinMax(String new_path) throws Exception
 	{
-		MinMaxInfo info = new MinMaxInfo();
+		MinMaxInfo_E3 info = new MinMaxInfo_E3();
 		String output_path = new_path + "/part-00000";
 		String file_line = "";
 
@@ -519,11 +521,14 @@ public class PagerankNaive extends Configured implements Tool
 		conf.set("number_nodes", "" + number_nodes);
 		conf.set("mixing_c", "" + mixing_c);
 		conf.set("make_symmetric", "" + make_symmetric);
-		conf.setJobName("Pagerank_Stage1");
+		conf.set("DATASIZE", "" + DATASIZE);
+		conf.set("P", "" + P);
+		conf.setJobName("Pagerank_Stage1_E3 "+"DATASIZE" + DATASIZE + " P" + P );
 		
 		conf.setMapperClass(MapStage1.class);        
 		conf.setReducerClass(RedStage1.class);
-
+//System.out.println("edge path: "+edge_path);
+//System.out.println("vector path: "+vector_path);
 		FileInputFormat.setInputPaths(conf, edge_path, vector_path);  
 		FileOutputFormat.setOutputPath(conf, tempmv_path);  
 
@@ -607,5 +612,4 @@ public class PagerankNaive extends Configured implements Tool
     }
 
 }
-
 
