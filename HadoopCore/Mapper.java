@@ -23,7 +23,6 @@ import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.RawComparator;
 import org.apache.hadoop.io.compress.CompressionCodec;
-
 /** 
  * Maps input key/value pairs to a set of intermediate key/value pairs.  
  * 
@@ -96,6 +95,7 @@ public class Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 
   public class Context 
     extends MapContext<KEYIN,VALUEIN,KEYOUT,VALUEOUT> {
+	public RecordReader<KEYIN,VALUEIN> input;
     public Context(Configuration conf, TaskAttemptID taskid,
                    RecordReader<KEYIN,VALUEIN> reader,
                    RecordWriter<KEYOUT,VALUEOUT> writer,
@@ -103,6 +103,7 @@ public class Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
                    StatusReporter reporter,
                    InputSplit split) throws IOException, InterruptedException {
       super(conf, taskid, reader, writer, committer, reporter, split);
+	  this.input = reader;
     }
   }
   
@@ -140,9 +141,40 @@ public class Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
    */
   public void run(Context context) throws IOException, InterruptedException {
     setup(context);
-    while (context.nextKeyValue()) {
-      map(context.getCurrentKey(), context.getCurrentValue(), context);
-    }
+	Configuration job = context.getConfiguration();
+	if((getConfInt("sampling.estrategia", job))==4)
+    {
+		Float P = getConfFloat("sampling.P", job);
+		System.out.println("E4: " + getConfInt("sampling.estrategia", job) +" P: " + getConfFloat("sampling.P", job) );
+		while (context.nextKeyValue()) {
+			//context.input.getProgress return the progress of the input read between 0.0 and 1.0
+			if(context.input.getProgress()>=P){
+				break;
+			}
+			map(context.getCurrentKey(), context.getCurrentValue(), context);
+		} 
+	}
+	else {
+    	while (context.nextKeyValue()) {
+      		map(context.getCurrentKey(), context.getCurrentValue(), context);
+    	}
+	}
     cleanup(context);
   }
+
+   private int getConfInt(String name, Configuration job) throws InterruptedException {
+   return Integer.parseInt(getConf(name, job));
+ }
+
+ private float getConfFloat(String name, Configuration job) throws InterruptedException {
+   return Float.parseFloat(getConf(name, job));
+ }
+
+ private String getConf(String name, Configuration job) throws InterruptedException {
+   String result = job.get(name);
+   if (result == null) {
+     throw new InterruptedException("Missing required sampling parameters");
+   }
+   return result;
+ }
 }
