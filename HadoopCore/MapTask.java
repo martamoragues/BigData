@@ -769,7 +769,6 @@ class MapTask extends Task {
 	  if(estrategia == 1)
 	  {
 		System.out.println("E1: " + getConfInt("sampling.estrategia", job) + " seed: " + getConfInt("sampling.seed", job)+ " P: " + getConfInt("sampling.P", job) );
-		job.setJobName("E"+ getConfInt("sampling.estrategia", job) +" P" + getConfInt("sampling.P", job)+" s" + getConfInt("sampling.seed", job)+ " " +job.getJobName());
 		Random rnd = new Random(getConfInt("sampling.seed", job));
       	int random = 0;
       	int id= getTaskID().getTaskID().getId();
@@ -785,7 +784,6 @@ class MapTask extends Task {
 
 	  else if(estrategia == 2){
 		System.out.println("E2: " + getConfInt("sampling.estrategia", job) + " seed: " + getConfInt("sampling.seed", job)+ " P: " + getConfFloat("sampling.P", job) );
-	 	job.setJobName("E"+ getConfInt("sampling.estrategia", job) +" P" + getConfInt("sampling.P", job)+" s" + getConfInt("sampling.seed", job)+ " " +job.getJobName());
 		Double result = null;
 		Random rnd = new Random(getConfInt("sampling.seed", job));
         int random = 0;
@@ -805,7 +803,6 @@ class MapTask extends Task {
 	  }
 	  else if(estrategia == 3){
 		System.out.println("E3: " + getConfInt("sampling.estrategia", job) + " file size: " + getConfInt("sampling.all.file.size", job)+ " P: " + getConfFloat("sampling.P", job) );
-		job.setJobName("E"+ getConfInt("sampling.estrategia", job) +" P" + getConfInt("sampling.P", job)+ " " +job.getJobName());
 		long size_all_data = getConfInt("sampling.all.file.size", job);
 		Float skipModule = getConfFloat("sampling.P", job);
 		long current_read=((org.apache.hadoop.mapreduce.lib.input.FileSplit)split).getStart();
@@ -818,7 +815,6 @@ class MapTask extends Task {
       else if(estrategia == 5)
 	 {
 		System.out.println("E5: " + getConfInt("sampling.estrategia", job) + " P: " + getConfInt("sampling.P", job) );
-		job.setJobName("E"+ getConfInt("sampling.estrategia", job) +" P" + getConfInt("sampling.P", job)+ " " +job.getJobName());
 		long start_block = ((org.apache.hadoop.mapreduce.lib.input.FileSplit)split).getStart();
         int skipModule = getConfInt("sampling.P", job);
         long size_block = getConfInt("dfs.block.size", job); 
