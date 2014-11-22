@@ -216,6 +216,25 @@ public class Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
         }
       }
     }
+
+    else if(estrategia == 5)
+    {
+      System.out.println("E5: " + getConfInt("sampling.estrategia", job) + " P: " + getConfInt("sampling.P", job) );
+      long start_block = ((org.apache.hadoop.mapreduce.lib.input.FileSplit)context.getInputSplit()).getStart();
+      int skipModule = getConfInt("sampling.P", job);
+      long size_block = getConfInt("dfs.block.size", job); 
+      long num_bloc = start_block / size_block;
+      boolean result = ((num_bloc%skipModule)==0);
+
+      // System.out.println("Bloc: " + num_bloc + " result: " + result);
+      if(result){
+        // System.out.println("ENTRO IF");
+        while (context.nextKeyValue()) {
+          map(context.getCurrentKey(), context.getCurrentValue(), context);
+        }
+      } 
+    }
+
     else {
       while (context.nextKeyValue()) {
         map(context.getCurrentKey(), context.getCurrentValue(), context);
