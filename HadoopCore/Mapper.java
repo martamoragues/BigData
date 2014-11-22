@@ -161,8 +161,30 @@ public class Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
       }
     }
 
+    else if(estrategia == 2)
+    {
+      System.out.println("E2: " + getConfInt("sampling.estrategia", job) + " seed: " + getConfInt("sampling.seed", job)+ " ID: " + context.taskID + " P: " + getConfFloat("sampling.P", job) );
+      Random rnd = new Random(getConfInt("sampling.seed", job) + context.taskID);
+      Float skipModule = getConfFloat("sampling.P", job); 
+
+      double p = 1.0/skipModule;
+      Double prop = Math.log(1.0-p); // -0.69
+      Double result = num_random(prop, rnd);
+
+      while (context.nextKeyValue()) {
+        // System.out.println("Current random: "+result);
+        if(result == 0.0){
+          // System.out.println("ENTRO IF");
+          map(context.getCurrentKey(), context.getCurrentValue(), context);
+          result = num_random(prop, rnd);
+        } else {
+          result -= 1.0;
+        }
+      }
+    }
+
     else if(estrategia == 4)
-      {
+    {
       Float P = getConfFloat("sampling.P", job);
       System.out.println("E4: " + getConfInt("sampling.estrategia", job) +" P: " + getConfFloat("sampling.P", job) );
       while (context.nextKeyValue()) {
@@ -178,22 +200,34 @@ public class Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
         map(context.getCurrentKey(), context.getCurrentValue(), context);
       }
     }
-      cleanup(context);
+    cleanup(context);
+  }
+
+
+  private int getConfInt(String name, Configuration job) throws InterruptedException {
+    return Integer.parseInt(getConf(name, job));
+  }
+
+  private float getConfFloat(String name, Configuration job) throws InterruptedException {
+    return Float.parseFloat(getConf(name, job));
+  }
+
+  private String getConf(String name, Configuration job) throws InterruptedException {
+    String result = job.get(name);
+    if (result == null) {
+      throw new InterruptedException("Missing required sampling parameters");
     }
+    return result;
+  }
 
-   private int getConfInt(String name, Configuration job) throws InterruptedException {
-   return Integer.parseInt(getConf(name, job));
- }
 
- private float getConfFloat(String name, Configuration job) throws InterruptedException {
-   return Float.parseFloat(getConf(name, job));
- }
+  public double num_random(double prop, Random rnd){
+    double u = rnd.nextDouble();
+    double k = Math.log(u)/prop;
+    // System.out.println("nextDouble en random---> "+u);
+    // System.out.println("logaritmo en random----> "+k);
+    k = Math.floor(k);
+    return (int)(k);
+  }
 
- private String getConf(String name, Configuration job) throws InterruptedException {
-   String result = job.get(name);
-   if (result == null) {
-     throw new InterruptedException("Missing required sampling parameters");
-   }
-   return result;
- }
 }
