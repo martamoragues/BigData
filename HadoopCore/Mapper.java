@@ -183,6 +183,23 @@ public class Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
       }
     }
 
+    else if(estrategia == 3)
+    {
+      System.out.println("E3: " + getConfInt("sampling.estrategia", job) + " file size: " + getConfLong("sampling.all.file.size", job)+ " P: " + getConfFloat("sampling.P", job) );
+      long size_all_data = getConfLong("sampling.all.file.size", job);
+      Float skipModule = getConfFloat("sampling.P", job);
+      long current_read=((org.apache.hadoop.mapreduce.lib.input.FileSplit)context.getInputSplit()).getStart();
+      float limit_to_read = size_all_data*skipModule;
+
+      // System.out.println("Current read: " + current_read + " limit: " + limit_to_read);
+      if(current_read < limit_to_read){
+        // System.out.println("ENTRO IF");
+        while (context.nextKeyValue()) {
+          map(context.getCurrentKey(), context.getCurrentValue(), context);
+        }
+      }
+    }
+
     else if(estrategia == 4)
     {
       Float P = getConfFloat("sampling.P", job);
@@ -210,6 +227,10 @@ public class Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 
   private float getConfFloat(String name, Configuration job) throws InterruptedException {
     return Float.parseFloat(getConf(name, job));
+  }
+
+  private long getConfLong(String name, Configuration job) throws InterruptedException {
+    return Long.parseLong(getConf(name, job));
   }
 
   private String getConf(String name, Configuration job) throws InterruptedException {
