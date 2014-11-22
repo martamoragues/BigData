@@ -155,7 +155,7 @@ public class Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 
       while (context.nextKeyValue()) {
         random = rnd.nextInt(100);
-        if(random <= P){
+        if(random < P){
           map(context.getCurrentKey(), context.getCurrentValue(), context);
         }
       }
