@@ -19,6 +19,7 @@
 package org.apache.hadoop.mapreduce;
 
 import java.io.IOException;
+import java.util.Random;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.RawComparator;
@@ -95,7 +96,8 @@ public class Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 
   public class Context 
     extends MapContext<KEYIN,VALUEIN,KEYOUT,VALUEOUT> {
-	public RecordReader<KEYIN,VALUEIN> input;
+    public RecordReader<KEYIN,VALUEIN> input;
+    public int taskID;
     public Context(Configuration conf, TaskAttemptID taskid,
                    RecordReader<KEYIN,VALUEIN> reader,
                    RecordWriter<KEYOUT,VALUEOUT> writer,
@@ -103,7 +105,8 @@ public class Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
                    StatusReporter reporter,
                    InputSplit split) throws IOException, InterruptedException {
       super(conf, taskid, reader, writer, committer, reporter, split);
-	  this.input = reader;
+    this.input = reader;
+    this.taskID = taskid.getTaskID().getId();
     }
   }
   
@@ -141,26 +144,42 @@ public class Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
    */
   public void run(Context context) throws IOException, InterruptedException {
     setup(context);
-	Configuration job = context.getConfiguration();
-	if((getConfInt("sampling.estrategia", job))==4)
+    Configuration job = context.getConfiguration();
+    int estrategia = getConfInt("sampling.estrategia", job);
+    if(estrategia == 1)
     {
-		Float P = getConfFloat("sampling.P", job);
-		System.out.println("E4: " + getConfInt("sampling.estrategia", job) +" P: " + getConfFloat("sampling.P", job) );
-		while (context.nextKeyValue()) {
-			//context.input.getProgress return the progress of the input read between 0.0 and 1.0
-			if(context.input.getProgress()>=P){
-				break;
-			}
-			map(context.getCurrentKey(), context.getCurrentValue(), context);
-		} 
-	}
-	else {
-    	while (context.nextKeyValue()) {
-      		map(context.getCurrentKey(), context.getCurrentValue(), context);
-    	}
-	}
-    cleanup(context);
-  }
+      System.out.println("E1: " + getConfInt("sampling.estrategia", job) + " seed: " + getConfInt("sampling.seed", job)+ " ID: " + context.taskID + " P: " + getConfInt("sampling.P", job) );
+      Random rnd = new Random(getConfInt("sampling.seed", job) + context.taskID);
+      int random;
+      int P = getConfInt("sampling.P", job);
+
+      while (context.nextKeyValue()) {
+        random = rnd.nextInt(100);
+        if(random <= P){
+          map(context.getCurrentKey(), context.getCurrentValue(), context);
+        }
+      }
+    }
+
+    else if(estrategia == 4)
+      {
+      Float P = getConfFloat("sampling.P", job);
+      System.out.println("E4: " + getConfInt("sampling.estrategia", job) +" P: " + getConfFloat("sampling.P", job) );
+      while (context.nextKeyValue()) {
+        //context.input.getProgress return the progress of the input read between 0.0 and 1.0
+        if(context.input.getProgress()>=P){
+          break;
+        }
+        map(context.getCurrentKey(), context.getCurrentValue(), context);
+      } 
+    }
+    else {
+      while (context.nextKeyValue()) {
+        map(context.getCurrentKey(), context.getCurrentValue(), context);
+      }
+    }
+      cleanup(context);
+    }
 
    private int getConfInt(String name, Configuration job) throws InterruptedException {
    return Integer.parseInt(getConf(name, job));
