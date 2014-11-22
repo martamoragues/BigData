@@ -202,15 +202,19 @@ public class Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 
     else if(estrategia == 4)
     {
-      Float P = getConfFloat("sampling.P", job);
       System.out.println("E4: " + getConfInt("sampling.estrategia", job) +" P: " + getConfFloat("sampling.P", job) );
+      Float P = getConfFloat("sampling.P", job);
       while (context.nextKeyValue()) {
         //context.input.getProgress return the progress of the input read between 0.0 and 1.0
-        if(context.input.getProgress()>=P){
+        // System.out.println("Progress: " + context.input.getProgress());
+        if(context.input.getProgress()<=P){
+          // System.out.println("LLEGEIXO");
+          map(context.getCurrentKey(), context.getCurrentValue(), context);
+        } else {
+          // System.out.println("SORTIM FORA");
           break;
         }
-        map(context.getCurrentKey(), context.getCurrentValue(), context);
-      } 
+      }
     }
     else {
       while (context.nextKeyValue()) {
