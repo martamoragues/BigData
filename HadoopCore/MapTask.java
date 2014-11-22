@@ -430,7 +430,73 @@ class MapTask extends Task {
       ReflectionUtils.newInstance(job.getMapRunnerClass(), job);
 
     try {
-      runner.run(in, new OldOutputCollector(collector, conf), reporter);
+     
+ 	int estrategia = getConfInt("sampling.estrategia", job); 
+	  if(estrategia == 1)
+	  {
+		System.out.println("E1: " + getConfInt("sampling.estrategia", job) + " seed: " + getConfInt("sampling.seed", job)+ " P: " + getConfInt("sampling.P", job) );
+		Random rnd = new Random(getConfInt("sampling.seed", job));
+      	int random = 0;
+      	int id= getTaskID().getTaskID().getId();
+
+      	for(int i = 0; i < id; i++){
+        	random = rnd.nextInt(100);
+      	}
+		int P = getConfInt("sampling.P", job);
+		if(random <= P){
+	  		runner.run(in, new OldOutputCollector(collector, conf), reporter);
+    	}
+      }  
+
+	  else if(estrategia == 2){
+		System.out.println("E2: " + getConfInt("sampling.estrategia", job) + " seed: " + getConfInt("sampling.seed", job)+ " P: " + getConfFloat("sampling.P", job) );
+		Double result = null;
+		Random rnd = new Random(getConfInt("sampling.seed", job));
+        int random = 0;
+        int id= getTaskID().getTaskID().getId();
+
+        for(int i = 0; i < id; i++){
+            random = rnd.nextInt(100);
+        }
+		Float skipModule = getConfFloat("sampling.P", job); 
+        double p = 1.0/skipModule;
+        Double prop = Math.log(1.0-p);
+        result = num_random(prop, random);
+		
+		if(result == 0.0){
+	  		runner.run(in, new OldOutputCollector(collector, conf), reporter);
+		}
+	  }
+	  else if(estrategia == 3){
+		System.out.println("E3: " + getConfInt("sampling.estrategia", job) + " file size: " + getConfLong("sampling.all.file.size", job)+ " P: " + getConfFloat("sampling.P", job) );
+		long size_all_data = getConfLong("sampling.all.file.size", job);
+		Float skipModule = getConfFloat("sampling.P", job);
+		long current_read=((org.apache.hadoop.mapred.FileSplit)inputSplit).getStart();
+		float limit_to_read = size_all_data*skipModule;
+		if(current_read < limit_to_read){
+	  		runner.run(in, new OldOutputCollector(collector, conf), reporter);
+		}
+	  }
+	
+      else if(estrategia == 5)
+	 {
+		System.out.println("E5: " + getConfInt("sampling.estrategia", job) + " P: " + getConfInt("sampling.P", job) );
+		long start_block = ((org.apache.hadoop.mapred.FileSplit)inputSplit).getStart();
+        int skipModule = getConfInt("sampling.P", job);
+        long size_block = getConfInt("dfs.block.size", job); 
+        long num_bloc = start_block / size_block;
+        boolean result = ((num_bloc%skipModule)==0);
+		
+  		if(result){
+	  		runner.run(in, new OldOutputCollector(collector, conf), reporter);
+		} 
+	}
+	else {
+	  	runner.run(in, new OldOutputCollector(collector, conf), reporter);
+	}	
+
+
+
       collector.flush();
     } finally {
       //close
@@ -802,8 +868,8 @@ class MapTask extends Task {
 		}
 	  }
 	  else if(estrategia == 3){
-		System.out.println("E3: " + getConfInt("sampling.estrategia", job) + " file size: " + getConfInt("sampling.all.file.size", job)+ " P: " + getConfFloat("sampling.P", job) );
-		long size_all_data = getConfInt("sampling.all.file.size", job);
+		System.out.println("E3: " + getConfInt("sampling.estrategia", job) + " file size: " + getConfLong("sampling.all.file.size", job)+ " P: " + getConfFloat("sampling.P", job) );
+		long size_all_data = getConfLong("sampling.all.file.size", job);
 		Float skipModule = getConfFloat("sampling.P", job);
 		long current_read=((org.apache.hadoop.mapreduce.lib.input.FileSplit)split).getStart();
 		float limit_to_read = size_all_data*skipModule;
@@ -841,6 +907,10 @@ class MapTask extends Task {
     }
   }
 
+
+ private long getConfLong(String name, JobConf job) throws ClassNotFoundException {
+   return Long.parseLong(getConf(name, job));
+ }
  private int getConfInt(String name, JobConf job) throws ClassNotFoundException {
    return Integer.parseInt(getConf(name, job));
  }
