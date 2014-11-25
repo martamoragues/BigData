@@ -37,7 +37,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.Random;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -83,8 +82,10 @@ class MapTask extends Task {
    * The size of each record in the index file for the map-outputs.
    */
   public static final int MAP_OUTPUT_INDEX_RECORD_LENGTH = 24;
+
   private TaskSplitIndex splitMetaInfo = new TaskSplitIndex();
   private final static int APPROX_HEADER_LENGTH = 150;
+
   private static final Log LOG = LogFactory.getLog(MapTask.class.getName());
 
   {   // set phase for this task
@@ -343,6 +344,7 @@ class MapTask extends Task {
   public void run(final JobConf job, final TaskUmbilicalProtocol umbilical)
     throws IOException, ClassNotFoundException, InterruptedException {
     this.umbilical = umbilical;
+
     // start thread that will handle communication with parent
     TaskReporter reporter = new TaskReporter(getProgress(), umbilical);
     reporter.startCommunicationThread();
@@ -430,73 +432,7 @@ class MapTask extends Task {
       ReflectionUtils.newInstance(job.getMapRunnerClass(), job);
 
     try {
-     
- 	int estrategia = getConfInt("sampling.estrategia", job); 
-	  if(estrategia == 1)
-	  {
-		System.out.println("E1: " + getConfInt("sampling.estrategia", job) + " seed: " + getConfInt("sampling.seed", job)+ " P: " + getConfInt("sampling.P", job) );
-		Random rnd = new Random(getConfInt("sampling.seed", job));
-      	int random = 0;
-      	int id= getTaskID().getTaskID().getId();
-
-      	for(int i = 0; i < id; i++){
-        	random = rnd.nextInt(100);
-      	}
-		int P = getConfInt("sampling.P", job);
-		if(random <= P){
-	  		runner.run(in, new OldOutputCollector(collector, conf), reporter);
-    	}
-      }  
-
-	  else if(estrategia == 2){
-		System.out.println("E2: " + getConfInt("sampling.estrategia", job) + " seed: " + getConfInt("sampling.seed", job)+ " P: " + getConfFloat("sampling.P", job) );
-		Double result = null;
-		Random rnd = new Random(getConfInt("sampling.seed", job));
-        int random = 0;
-        int id= getTaskID().getTaskID().getId();
-
-        for(int i = 0; i < id; i++){
-            random = rnd.nextInt(100);
-        }
-		Float skipModule = getConfFloat("sampling.P", job); 
-        double p = 1.0/skipModule;
-        Double prop = Math.log(1.0-p);
-        result = num_random(prop, random);
-		
-		if(result == 0.0){
-	  		runner.run(in, new OldOutputCollector(collector, conf), reporter);
-		}
-	  }
-	  else if(estrategia == 3){
-		System.out.println("E3: " + getConfInt("sampling.estrategia", job) + " file size: " + getConfLong("sampling.all.file.size", job)+ " P: " + getConfFloat("sampling.P", job) );
-		long size_all_data = getConfLong("sampling.all.file.size", job);
-		Float skipModule = getConfFloat("sampling.P", job);
-		long current_read=((org.apache.hadoop.mapred.FileSplit)inputSplit).getStart();
-		float limit_to_read = size_all_data*skipModule;
-		if(current_read < limit_to_read){
-	  		runner.run(in, new OldOutputCollector(collector, conf), reporter);
-		}
-	  }
-	
-      else if(estrategia == 5)
-	 {
-		System.out.println("E5: " + getConfInt("sampling.estrategia", job) + " P: " + getConfInt("sampling.P", job) );
-		long start_block = ((org.apache.hadoop.mapred.FileSplit)inputSplit).getStart();
-        int skipModule = getConfInt("sampling.P", job);
-        long size_block = getConfInt("dfs.block.size", job); 
-        long num_bloc = start_block / size_block;
-        boolean result = ((num_bloc%skipModule)==0);
-		
-  		if(result){
-	  		runner.run(in, new OldOutputCollector(collector, conf), reporter);
-		} 
-	}
-	else {
-	  	runner.run(in, new OldOutputCollector(collector, conf), reporter);
-	}	
-
-
-
+      runner.run(in, new OldOutputCollector(collector, conf), reporter);
       collector.flush();
     } finally {
       //close
@@ -767,13 +703,6 @@ class MapTask extends Task {
     }
   }
 
-  public double num_random(double prop, double rnd){
-        double k = Math.log(rnd)/prop;
-//        System.out.println("logaritmo en random----> "+k);
-        k = Math.floor(k);
-        return (int)(k);
-    }
-
   @SuppressWarnings("unchecked")
   private <INKEY,INVALUE,OUTKEY,OUTVALUE>
   void runNewMapper(final JobConf job,
@@ -831,69 +760,7 @@ class MapTask extends Task {
                                                      reporter, split);
 
       input.initialize(split, mapperContext);
-   	  int estrategia = getConfInt("sampling.estrategia", job); 
-	  if(estrategia == 1)
-	  {
-		System.out.println("E1: " + getConfInt("sampling.estrategia", job) + " seed: " + getConfInt("sampling.seed", job)+ " P: " + getConfInt("sampling.P", job) );
-		Random rnd = new Random(getConfInt("sampling.seed", job));
-      	int random = 0;
-      	int id= getTaskID().getTaskID().getId();
-
-      	for(int i = 0; i < id; i++){
-        	random = rnd.nextInt(100);
-      	}
-		int P = getConfInt("sampling.P", job);
-		if(random <= P){
-      		mapper.run(mapperContext);
-    	}
-      }  
-
-	  else if(estrategia == 2){
-		System.out.println("E2: " + getConfInt("sampling.estrategia", job) + " seed: " + getConfInt("sampling.seed", job)+ " P: " + getConfFloat("sampling.P", job) );
-		Double result = null;
-		Random rnd = new Random(getConfInt("sampling.seed", job));
-        int random = 0;
-        int id= getTaskID().getTaskID().getId();
-
-        for(int i = 0; i < id; i++){
-            random = rnd.nextInt(100);
-        }
-		Float skipModule = getConfFloat("sampling.P", job); 
-        double p = 1.0/skipModule;
-        Double prop = Math.log(1.0-p);
-        result = num_random(prop, random);
-		
-		if(result == 0.0){
-			mapper.run(mapperContext);
-		}
-	  }
-	  else if(estrategia == 3){
-		System.out.println("E3: " + getConfInt("sampling.estrategia", job) + " file size: " + getConfLong("sampling.all.file.size", job)+ " P: " + getConfFloat("sampling.P", job) );
-		long size_all_data = getConfLong("sampling.all.file.size", job);
-		Float skipModule = getConfFloat("sampling.P", job);
-		long current_read=((org.apache.hadoop.mapreduce.lib.input.FileSplit)split).getStart();
-		float limit_to_read = size_all_data*skipModule;
-		if(current_read < limit_to_read){
-      		mapper.run(mapperContext);
-		}
-	  }
-	
-      else if(estrategia == 5)
-	 {
-		System.out.println("E5: " + getConfInt("sampling.estrategia", job) + " P: " + getConfInt("sampling.P", job) );
-		long start_block = ((org.apache.hadoop.mapreduce.lib.input.FileSplit)split).getStart();
-        int skipModule = getConfInt("sampling.P", job);
-        long size_block = getConfInt("dfs.block.size", job); 
-        long num_bloc = start_block / size_block;
-        boolean result = ((num_bloc%skipModule)==0);
-		
-  		if(result){
-			mapper.run(mapperContext);
-		} 
-	}
-	else {
-		mapper.run(mapperContext);
-	}	
+      mapper.run(mapperContext);
       input.close();
       output.close(mapperContext);
     } catch (NoSuchMethodException e) {
@@ -907,25 +774,6 @@ class MapTask extends Task {
     }
   }
 
-
- private long getConfLong(String name, JobConf job) throws ClassNotFoundException {
-   return Long.parseLong(getConf(name, job));
- }
- private int getConfInt(String name, JobConf job) throws ClassNotFoundException {
-   return Integer.parseInt(getConf(name, job));
- }
-
- private float getConfFloat(String name, JobConf job) throws ClassNotFoundException {
-   return Float.parseFloat(getConf(name, job));
- }
-
- private String getConf(String name, JobConf job) throws ClassNotFoundException {
-   String result = job.get(name);
-   if (result == null) {
-     throw new ClassNotFoundException("Missing required sampling parameters");
-   }
-   return result;
- }
   interface MapOutputCollector<K, V> {
 
     public void collect(K key, V value, int partition
