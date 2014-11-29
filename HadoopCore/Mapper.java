@@ -226,9 +226,9 @@ public class Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
       long num_bloc = start_block / size_block;
       boolean result = ((num_bloc%skipModule)==0);
 
-      // System.out.println("Bloc: " + num_bloc + " result: " + result);
+      System.out.println("Bloc: " + num_bloc + " result: " + result);
       if(result){
-        // System.out.println("ENTRO IF");
+        System.out.println("ENTRO IF");
         while (context.nextKeyValue()) {
           map(context.getCurrentKey(), context.getCurrentValue(), context);
         }

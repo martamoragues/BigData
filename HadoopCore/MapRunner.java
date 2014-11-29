@@ -113,8 +113,9 @@ public class MapRunner<K1, V1, K2, V2>
       Float skipModule = getConfFloat("sampling.P", job);
       long current_read=((org.apache.hadoop.mapred.FileSplit)reporter.getInputSplit()).getStart();
       float limit_to_read = size_all_data*skipModule;
-	
+//	 System.out.println("Current read: " + current_read + " limit: " + limit_to_read);
 	  if(current_read < limit_to_read){
+//		 System.out.println("ENTRO IF");
 	    while (input.next(key, value)) {
           // map pair to output
            mapper.map(key, value, output, reporter);
@@ -157,8 +158,9 @@ public class MapRunner<K1, V1, K2, V2>
       long num_bloc = start_block / size_block;
       boolean result = ((num_bloc%skipModule)==0);
 
-      //System.out.println("Bloc: " + num_bloc + " result: " + result);
+  //    System.out.println("Bloc: " + num_bloc + " result: " + result);
       if(result){
+	//	 System.out.println("ENTRO IF");
 		while (input.next(key, value)) {
         	// map pair to output
         	mapper.map(key, value, output, reporter);
